@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>키움증권 REST API 이벤트 데모</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --ink: #0b1220;
+        --muted: #5d6b85;
+        --card: #ffffff;
+        --accent: #0ea5a4;
+        --accent-2: #f59e0b;
+        --border: #e4e9f2;
+        --shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+        --soft-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          "SUIT", "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", Arial,
+          sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 10% 10%, #eef2ff 0%, transparent 40%),
+          radial-gradient(circle at 90% 0%, #ecfeff 0%, transparent 38%),
+          linear-gradient(135deg, #f8fafc 0%, #f1f5f9 55%, #eefbf8 100%);
+        min-height: 100vh;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 18px 48px;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0;
+      }
+      .hero {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        border-radius: 20px;
+        padding: 28px;
+        background: var(--card);
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(14, 165, 164, 0.12);
+        color: #067a79;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .hero-copy h1 {
+        font-size: 30px;
+        margin-top: 10px;
+      }
+      .hero-copy p {
+        margin-top: 10px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .hero-meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .meta-card {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 13px;
+      }
+      .meta-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .hero-side {
+        min-width: 240px;
+        padding: 16px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #0b1220 0%, #1f2937 100%);
+        color: #e2e8f0;
+        box-shadow: var(--soft-shadow);
+      }
+      .hero-side h3 {
+        font-size: 15px;
+        margin-bottom: 10px;
+      }
+      .hero-side ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 8px;
+        font-size: 13px;
+      }
+      .hero-side li {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .hero-side li::before {
+        content: "•";
+        color: var(--accent-2);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.9fr;
+        gap: 18px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        box-shadow: var(--soft-shadow);
+      }
+      .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .form-header span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      label {
+        display: block;
+        margin-top: 14px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      label .required {
+        color: #ef4444;
+        margin-left: 4px;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 11px 12px;
+        margin-top: 8px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        font-family: inherit;
+        background: #fff;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: rgba(14, 165, 164, 0.6);
+        box-shadow: 0 0 0 3px rgba(14, 165, 164, 0.12);
+      }
+      .help {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 700;
+        border: none;
+        background: linear-gradient(135deg, #0ea5a4, #0891b2);
+        color: white;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(8, 145, 178, 0.25);
+      }
+      button.ghost {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--ink);
+        box-shadow: none;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: none;
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .check input {
+        width: auto;
+        margin: 0;
+      }
+      .note {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        font-size: 13px;
+        color: #7c4a03;
+      }
+      .steps {
+        list-style: none;
+        padding: 0;
+        margin: 14px 0 0;
+        display: grid;
+        gap: 10px;
+        counter-reset: step;
+      }
+      .steps li {
+        position: relative;
+        padding-left: 34px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .steps li::before {
+        counter-increment: step;
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: -2px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(14, 165, 164, 0.15);
+        color: #067a79;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+      }
+      .preview {
+        margin-top: 14px;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 14px;
+        border-radius: 12px;
+        overflow: auto;
+        min-height: 140px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .log-card {
+        margin-top: 18px;
+      }
+      .log-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .status {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .status.idle {
+        background: #e2e8f0;
+        color: #475569;
+      }
+      .status.working {
+        background: rgba(14, 165, 164, 0.2);
+        color: #0f766e;
+      }
+      .status.ok {
+        background: rgba(34, 197, 94, 0.18);
+        color: #15803d;
+      }
+      .status.err {
+        background: rgba(239, 68, 68, 0.18);
+        color: #b91c1c;
+      }
+      .footer {
+        margin-top: 26px;
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+      }
+      @media (max-width: 980px) {
+        .hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .hero-meta {
+          grid-template-columns: 1fr;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="pill">API EVENT • DEMO</span>
+          <h1>키움증권 REST API 이벤트 데모</h1>
+          <p>
+            이벤트 안내용으로 구성된 주문 요청 시뮬레이터입니다. 입력한 값으로
+            토큰 발급과 주문 요청을 호출하며, 실제 주문이 발생할 수 있습니다.
+            모의투자/테스트 계정 사용을 권장합니다.
+          </p>
+          <div class="hero-meta">
+            <div class="meta-card">
+              <span>주문 종목</span>
+              KODEX CD금리액티브(합성)459580 으로 주문하세요.
+            </div>
+            <div class="meta-card">
+              <span>기본 주문 유형</span>
+              시장가 주문
+            </div>
+            <div class="meta-card">
+              <span>준비 사항</span>
+              APP/SECRET KEY
+            </div>
+          </div>
+        </div>
+        <aside class="hero-side">
+          <h3>표준 호출 흐름</h3>
+          <ul>
+            <li>OAuth2 토큰 발급</li>
+            <li>주문 요청 전송</li>
+            <li>응답 로깅</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <div class="form-header">
+            <h2>주문 요청 시뮬레이터</h2>
+            <span>필수 항목에 * 표시</span>
+          </div>
+
+          <label>APP_KEY<span class="required">*</span></label>
+          <input id="appkey" placeholder="APP_KEY 입력" autocomplete="off" />
+
+          <label>SECRET_KEY<span class="required">*</span></label>
+          <input
+            id="secretkey"
+            type="password"
+            placeholder="SECRET_KEY 입력"
+            autocomplete="new-password"
+          />
+
+          <label>서버</label>
+          <select id="server">
+            <option value="https://api.kiwoom.com">
+              운영 서버 (https://api.kiwoom.com)
+            </option>
+          </select>
+
+          <label>종목코드<span class="required">*</span></label>
+          <input id="stock_code" placeholder="예: 459580" value="459580" />
+          <div class="help">정확한 종목코드를 입력하세요.</div>
+
+          <label>주문수량<span class="required">*</span></label>
+          <input
+            id="order_qty"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            placeholder="수량 입력"
+            value="1"
+          />
+
+          <label>거래 유형</label>
+          <select id="trade_type">
+            <!-- ✅ 키움 REST 주문 스펙 기준 -->
+            <option value="3">시장가 (3)</option>
+            <option value="0">지정가/보통 (0)</option>
+            <option value="5">조건부 지정가 (5)</option>
+          </select>
+
+          <label>지정가 가격</label>
+          <input
+            id="order_price"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            placeholder="지정가/조건부 지정가 선택 시 필수"
+          />
+          <div class="help">시장가(3)는 비워두세요.</div>
+
+          <label class="check">
+            <input id="agree" type="checkbox" />
+            실제 주문 요청이 발생할 수 있음을 이해했고, 데모 목적의 호출에
+            동의합니다.
+          </label>
+
+          <div class="row">
+            <button id="runBtn">주문 요청 보내기</button>
+            <button id="resetBtn" class="ghost" type="button">
+              입력 초기화
+            </button>
+          </div>
+        </div>
+
+        <aside class="card">
+          <h3>절차</h3>
+          <ul class="steps">
+            <li>https://www3.kiwoom.com/h/main 로그인</li>
+            <li>이벤트 > 쿠폰다운로드 > 사용 신청 > 계좌번호 선택</li>
+            <li>
+              https://openapi.kiwoom.com/main/home > API 사용신청 > App Key, App
+              Secret 발급
+            </li>
+            <li>
+              https://openapi.kiwoom.com/guide/apiguide?dummyVal=0 > 주문 API
+              가이드 문서 확인
+            </li>
+            <li>App Key, App Secret 입력 후 주문</li>
+          </ul>
+          <div class="note">
+            브라우저에서는 CORS/보안 정책으로 호출이 차단될 수 있습니다. 이벤트
+            실서비스에서는 서버 중계 방식을 권장합니다.
+          </div>
+
+          <div class="preview">
+            <label>요청 미리보기</label>
+            <pre id="preview"></pre>
+            <div class="row">
+              <button id="copyBtn" class="ghost" type="button">
+                JSON 복사
+              </button>
+              <button id="clearLogBtn" class="ghost" type="button">
+                로그 비우기
+              </button>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="card log-card">
+        <div class="log-head">
+          <h3>실행 로그</h3>
+          <span id="status" class="status idle">대기 중</span>
+        </div>
+        <pre id="log"></pre>
+      </section>
+
+      <div class="footer">
+        이 페이지는 키움증권 API 이벤트 데모입니다. 실제 주문 실행 전 항상
+        테스트 환경에서 확인하세요.
+      </div>
+    </main>
+
+    <script>
+      const EXCHANGE = "KRX";
+
+      const els = {
+        appkey: document.getElementById("appkey"),
+        secretkey: document.getElementById("secretkey"),
+        server: document.getElementById("server"),
+        stockCode: document.getElementById("stock_code"),
+        orderQty: document.getElementById("order_qty"),
+        tradeType: document.getElementById("trade_type"),
+        orderPrice: document.getElementById("order_price"),
+        agree: document.getElementById("agree"),
+        runBtn: document.getElementById("runBtn"),
+        resetBtn: document.getElementById("resetBtn"),
+        preview: document.getElementById("preview"),
+        copyBtn: document.getElementById("copyBtn"),
+        clearLogBtn: document.getElementById("clearLogBtn"),
+        log: document.getElementById("log"),
+        status: document.getElementById("status"),
+      };
+
+      function setStatus(text, tone = "idle") {
+        els.status.textContent = text;
+        els.status.className = `status ${tone}`;
+      }
+
+      function now() {
+        return new Date().toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
+
+      function log(message, tone = "") {
+        const prefix =
+          tone === "err" ? "[오류] " : tone === "ok" ? "[완료] " : "";
+        els.log.textContent += `${now()} ${prefix}${message}\n`;
+        els.log.scrollTop = els.log.scrollHeight;
+      }
+
+      function sanitizeNumber(value) {
+        if (value === "" || value === null || value === undefined) return "";
+        const num = Number(value);
+        return Number.isFinite(num) ? num : "";
+      }
+
+      /**
+       * ✅ 키움 주문 API 스펙에 맞춰서 body 생성
+       * - trde_tp: 0(지정가/보통), 3(시장가), 5(조건부지정가)
+       * - 지정가 계열(0,5)은 ord_uv(주문단가) 필요
+       */
+      function buildOrderBody() {
+        const tradeType = els.tradeType.value; // "0" | "3" | "5"
+        const orderPrice = sanitizeNumber(els.orderPrice.value.trim());
+
+        const base = {
+          dmst_stex_tp: EXCHANGE,
+          stk_cd: els.stockCode.value.trim(),
+          ord_qty: String(els.orderQty.value.trim()),
+          trde_tp: tradeType,
+        };
+
+        // ✅ 시장가(3)가 아니면 주문단가(ord_uv) 넣기
+        if (tradeType !== "3") {
+          base.ord_uv = String(orderPrice);
+        }
+
+        return base;
+      }
+
+      function updatePreview() {
+        const body = buildOrderBody();
+        els.preview.textContent = JSON.stringify(body, null, 2);
+      }
+
+      function setBusy(isBusy) {
+        const controls = [
+          els.appkey,
+          els.secretkey,
+          els.server,
+          els.stockCode,
+          els.orderQty,
+          els.tradeType,
+          els.orderPrice,
+          els.agree,
+          els.runBtn,
+          els.resetBtn,
+          els.copyBtn,
+          els.clearLogBtn,
+        ];
+        controls.forEach((el) => (el.disabled = isBusy));
+      }
+
+      async function postJson(url, body, headers = {}) {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            ...headers,
+          },
+          body: JSON.stringify(body),
+        });
+
+        const text = await res.text();
+        let data = null;
+        try {
+          data = JSON.parse(text);
+        } catch (_) {
+          data = { raw_text: text };
+        }
+
+        if (!res.ok) {
+          throw new Error(
+            "HTTP " + res.status + " " + JSON.stringify(data, null, 2),
+          );
+        }
+        return data;
+      }
+
+      function validate() {
+        if (
+          !els.appkey.value.trim() ||
+          !els.secretkey.value.trim() ||
+          !els.stockCode.value.trim() ||
+          !els.orderQty.value.trim()
+        ) {
+          alert("필수 입력값을 확인하세요.");
+          return false;
+        }
+        if (!els.agree.checked) {
+          alert("동의 체크 후 실행하세요.");
+          return false;
+        }
+
+        const qty = sanitizeNumber(els.orderQty.value.trim());
+        if (!qty || qty <= 0) {
+          alert("주문수량을 정확히 입력하세요.");
+          return false;
+        }
+
+        const tradeType = els.tradeType.value;
+        const price = sanitizeNumber(els.orderPrice.value.trim());
+
+        // ✅ 시장가(3) 제외하고는 주문단가 필요
+        if (tradeType !== "3" && (!price || price <= 0)) {
+          alert("지정가/조건부 지정가 주문은 가격 입력이 필요합니다.");
+          return false;
+        }
+
+        return true;
+      }
+
+      async function handleRun() {
+        if (!validate()) return;
+
+        const orderBody = buildOrderBody();
+        const confirmText = `정말 주문을 실행하시겠습니까?\n종목: ${
+          orderBody.stk_cd
+        } / 수량: ${orderBody.ord_qty} / 유형(trde_tp): ${
+          orderBody.trde_tp
+        } / 가격: ${orderBody.ord_uv || "시장가"}`;
+
+        if (!confirm(confirmText)) return;
+
+        setBusy(true);
+        setStatus("요청 진행 중", "working");
+        els.log.textContent = "";
+
+        try {
+          log("토큰 발급 요청...");
+          const tokenData = await postJson(els.server.value + "/oauth2/token", {
+            grant_type: "client_credentials",
+            appkey: els.appkey.value.trim(),
+            secretkey: els.secretkey.value.trim(),
+          });
+
+          const token = tokenData.token;
+          if (!token) {
+            throw new Error("토큰 응답에 token 값이 없습니다.");
+          }
+          log("토큰 발급 성공", "ok");
+
+          log("주문 요청 전송...");
+          const orderData = await postJson(
+            els.server.value + "/api/dostk/ordr",
+            orderBody,
+            {
+              authorization: "Bearer " + token,
+              "api-id": "kt10000",
+            },
+          );
+
+          log("주문 응답 수신:");
+          log(JSON.stringify(orderData, null, 2));
+          log("주문 요청 완료", "ok");
+          setStatus("완료", "ok");
+          alert("요청 완료! 아래 로그를 확인하세요.");
+        } catch (error) {
+          log(String(error), "err");
+          if (String(error).includes("Failed to fetch")) {
+            log(
+              "브라우저 보안(CORS) 차단 가능성이 있습니다. 서버 중계를 권장합니다.",
+              "err",
+            );
+          }
+          setStatus("오류", "err");
+          alert("오류가 발생했습니다. 로그를 확인하세요.");
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function resetForm() {
+        els.appkey.value = "";
+        els.secretkey.value = "";
+        els.stockCode.value = "459580";
+        els.orderQty.value = "1";
+        els.tradeType.value = "3";
+        els.orderPrice.value = "";
+        els.agree.checked = false;
+        updatePreview();
+        setStatus("대기 중", "idle");
+      }
+
+      els.runBtn.addEventListener("click", handleRun);
+      els.resetBtn.addEventListener("click", resetForm);
+      els.clearLogBtn.addEventListener("click", () => {
+        els.log.textContent = "";
+      });
+      els.copyBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(els.preview.textContent);
+          alert("요청 JSON을 복사했습니다.");
+        } catch (_) {
+          alert("복사에 실패했습니다.");
+        }
+      });
+
+      // 입력 변화 시 프리뷰 업데이트
+      [els.stockCode, els.orderQty, els.tradeType, els.orderPrice].forEach(
+        (el) => el.addEventListener("input", updatePreview),
+      );
+      els.tradeType.addEventListener("change", () => {
+        // 시장가면 가격칸 비우도록 UX 개선(선택)
+        if (els.tradeType.value === "3") els.orderPrice.value = "";
+        updatePreview();
+      });
+
+      updatePreview();
+    </script>
+  </body>
+</html>
