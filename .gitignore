@@ -1,0 +1,4 @@
+.vercel
+.env
+/public/api.html
+/public/ads.txt
